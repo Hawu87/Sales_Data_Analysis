@@ -1,0 +1,112 @@
+--Inspecting the data
+SELECT
+  *
+FROM my-first-project-390716.sales_data.sales
+
+-- Checking unique values for (Year, ProductLine, Country, Dealsize, Territory)
+
+SELECT DISTINCT(STATUS) FROM my-first-project-390716.sales_data.sales --STATUS of order
+
+SELECT DISTINCT(YEAR_ID) FROM my-first-project-390716.sales_data.sales --YEARS ACCOUNTED FOR
+
+SELECT DISTINCT(PRODUCTLINE) FROM my-first-project-390716.sales_data.sales --PRODUCTS INCLUDED
+
+SELECT DISTINCT(COUNTRY) FROM my-first-project-390716.sales_data.sales --COUNTRIES INVOLVED
+
+SELECT DISTINCT(DEALSIZE) FROM my-first-project-390716.sales_data.sales --Deal Sizes
+
+SELECT DISTINCT(TERRITORY) FROM my-first-project-390716.sales_data.sales --COUNTRIES INVOLVED
+
+
+-- ANALYSIS
+--Grouping Sales by Product Line
+SELECT PRODUCTLINE AS Product, ROUND(SUM(SALES), 2) AS Revenue
+FROM `my-first-project-390716.sales_data.sales`
+GROUP BY PRODUCTLINE
+ORDER BY Revenue DESC
+
+--Checking for year with most Revenue
+SELECT YEAR_ID AS Year, ROUND(SUM(SALES), 2) AS Revenue
+FROM `my-first-project-390716.sales_data.sales`
+GROUP BY Year
+ORDER BY Revenue DESC
+
+--2005 showing a figure far lower than the other years, investing the sales by checking months
+SELECT DISTINCT(MONTH_ID) FROM `my-first-project-390716.sales_data.sales` WHERE YEAR_ID = 2003
+
+--Checking for Revenue from different DealSizes
+SELECT DEALSIZE AS Size, ROUND(SUM(SALES), 2) AS Revenue
+FROM `my-first-project-390716.sales_data.sales`
+GROUP BY Size
+ORDER BY Revenue DESC
+
+--What was the best month for sales in a specific year
+SELECT MONTH_ID AS Month, ROUND(SUM(SALES), 2) AS Revenue, COUNT(ORDERNUMBER) AS Frequency
+FROM `my-first-project-390716.sales_data.sales`
+WHERE YEAR_ID = 2005 --checking for different year
+GROUP BY(Month)
+ORDER BY Revenue DESC
+
+--Which product sells the most in November, since it is the best month
+SELECT PRODUCTLINE As Product, ROUND(SUM(SALES), 2) AS Revenue, COUNT(ORDERNUMBER) AS Frequency
+FROM `my-first-project-390716.sales_data.sales`
+WHERE YEAR_ID = 2003 AND MONTH_ID = 11 
+GROUP BY(PRODUCTLINE)
+ORDER BY Revenue DESC
+
+--Figuring out who the best customer is using RFM
+--Creating temporary table called rfm_temp_table
+with rfm AS
+  (SELECT
+    CUSTOMERNAME AS Customer,  
+    ROUND(SUM(SALES), 2) AS Monetary_Value,
+    ROUND(AVG(SALES), 2) AS Average_Monetary_Value,
+    COUNT(ORDERNUMBER) AS Frequency,
+    MAX(ORDERDATE) AS Last_Order,
+    (SELECT MAX(ORDERDATE) FROM `my-first-project-390716.sales_data.sales`) AS Max_Order_Date,
+    DATETIME_DIFF((SELECT MAX(ORDERDATE) FROM `my-first-project-390716.sales_data.sales`), MAX(ORDERDATE), DAY) AS Recency
+  FROM `my-first-project-390716.sales_data.sales`
+  GROUP BY Customer)
+  SELECT *,
+    NTILE(4) OVER (ORDER BY Recency DESC) AS rfm_Recency,
+    NTILE(4) OVER (ORDER BY Frequency) AS rfm_Frequency,
+    NTILE(4) OVER (ORDER BY Monetary_Value) AS rfm_monetary,
+    NTILE(4) OVER (ORDER BY Recency DESC) + NTILE(4) OVER (ORDER BY Frequency) + NTILE(4) OVER (ORDER BY Monetary_Value) AS rfm_cell,
+    CAST(NTILE(4) OVER (ORDER BY Recency DESC) AS STRING) || CAST(NTILE(4) OVER (ORDER BY Frequency) AS STRING) || CAST(NTILE(4) OVER (ORDER BY Monetary_Value) AS STRING) AS rfm_cell_string
+  From rfm
+  
+--Running Queries on temp table created from the data above
+SELECT Customer, rfm_Recency, rfm_Frequency, rfm_monetary,
+  CASE
+    when rfm_cell_string in ("111", "112", "121", "122", "123", "132", "211", "212", "114", "141", "142", "113", "214") then 'Iost_customers' --lost customers
+    when rfm_cell_string in ("133", "134", "143", "244", "334", "343", "344") then 'slipping away, cannot lose!' --Big spenders who have not purchased lately
+    when rfm_cell_string in ("311", "411", "331", "312", "314", "414") then 'new_customers'
+    when rfm_cell_string in ("222", "223", "233", "322", "224", "221") then 'potential churners' 
+    when rfm_cell_string in ("323", "333","321", "422", "332", "432", "421", "424", "441") then 'active' --(Customers who buy often & recently, but at low price points)
+    when rfm_cell_string in ("433", "434", "443", "444") then 'loyal'
+  END rfm_segment 
+FROM my-first-project-390716.sales_data.rfm_temp_table
+
+
+--Checking which products are often sold together
+--SELECT * FROM my-first-project-390716.sales_data.sales WHERE ORDERNUMBER = 10411
+SELECT PRODUCTCODE
+FROM my-first-project-390716.sales_data.sales
+WHERE ORDERNUMBER IN(
+  SELECT ORDERNUMBER
+  FROM(
+    SELECT ORDERNUMBER, COUNT(*) Frequency
+    FROM my-first-project-390716.sales_data.sales
+    WHERE STATUS = 'Shipped'
+    GROUP BY(ORDERNUMBER))
+  WHERE Frequency = 2)
+
+
+
+
+
+
+
+
+
+
