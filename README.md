@@ -5,18 +5,19 @@ Sales Analysis & Visualization Project
 
 Welcome to the Sales Analysis & Visualization project repository! This project demonstrates an end-to-end data analysis pipeline involving Google BigQuery and Tableau for in-depth sales data exploration and visualization.
 
-Project Overview
+# Project Overview
 In this project, we embarked on a journey to uncover actionable insights from an extensive sales dataset. Leveraging the power of Google BigQuery, advanced SQL queries and data transformations were performed to identify key trends, analyze customer behaviors, and assess performance metrics.
 
 Once the data had been analyzed and prepared, Tableau was employed to create a series of interactive dashboards and visually engaging visualizations. These dashboards serve as a powerful tool for data-driven decision-making, enabling stakeholders to gain a holistic understanding of the sales landscape.
 
-Project Highlights
+# Project Highlights
 Led an end-to-end data analysis initiative, utilizing Google BigQuery for comprehensive exploration of sales data.
 Conducted advanced SQL queries and data transformations to extract meaningful insights.
 Uncovered crucial trends, identified customer behaviors, and evaluated performance metrics.
 Leveraged Tableau's capabilities to design interactive and compelling dashboards.
 Empowered stakeholders with data-driven insights, enabling informed strategic decisions.
-Project Structure
+
+# Project Structure
 The repository is organized as follows:
 
 /sql_queries: Contains the SQL queries used to extract and transform the data in Google BigQuery.
