@@ -20,6 +20,8 @@ Project Structure
 The repository is organized as follows:
 
 /sql_queries: Contains the SQL queries used to extract and transform the data in Google BigQuery.
+
 /tableau_dashboards: Includes Tableau workbook files (.twb) and associated assets for the visualization part of the project.
+
 /data: Placeholder for sample or example data used in the project.
 
